@@ -203,6 +203,7 @@ section h3 {
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  z-index: 1;
 }
 
 /* Difficulty Badge */
@@ -216,6 +217,7 @@ section h3 {
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  z-index: 1;
 }
 
 .difficulty-beginner {

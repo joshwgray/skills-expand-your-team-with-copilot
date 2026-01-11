@@ -472,6 +472,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Fallback copy to clipboard for older browsers
+  function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showMessage('Link copied to clipboard!', 'success');
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      showMessage('Failed to copy link', 'error');
+    }
+    document.body.removeChild(textArea);
+  }
+
   // Function to generate shareable URL for an activity
   function getActivityShareUrl(activityName) {
     const baseUrl = window.location.origin + window.location.pathname;
@@ -501,12 +519,19 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = url;
         break;
       case 'copy':
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          showMessage('Link copied to clipboard!', 'success');
-        }).catch(err => {
-          console.error('Failed to copy link:', err);
-          showMessage('Failed to copy link', 'error');
-        });
+        // Try modern clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareUrl).then(() => {
+            showMessage('Link copied to clipboard!', 'success');
+          }).catch(err => {
+            console.error('Failed to copy link:', err);
+            // Fallback for browsers that don't support clipboard API
+            fallbackCopyToClipboard(shareUrl);
+          });
+        } else {
+          // Fallback for older browsers or non-HTTPS contexts
+          fallbackCopyToClipboard(shareUrl);
+        }
         break;
     }
   }
@@ -563,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="activity-header">
         <h4>${name}</h4>
         <div class="share-container">
-          <button class="share-button tooltip" data-activity="${name}" title="Share this activity">
+          <button class="share-button tooltip" data-activity="${name}">
             <span class="share-icon">🔗</span>
             <span class="tooltip-text">Share this activity</span>
           </button>
